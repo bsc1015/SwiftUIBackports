@@ -45,7 +45,15 @@ extension Image: Shareable {
                 .appendingPathComponent("\(UUID().uuidString)")
                 .appendingPathExtension(pathExtension)
             let renderer = ImageRenderer(content: self)
+            #if os(macOS)
+            var data: Data?
+            if let cgImage = renderer.nsImage?.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+                let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
+                data = bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])!
+            }
+            #else
             let data = renderer.uiImage?.jpegData(compressionQuality: 0.8)
+            #endif
             try data?.write(to: url, options: .atomic)
             return .init(contentsOf: url)
         } catch {
@@ -61,7 +69,15 @@ extension PlatformImage: Shareable {
             let url = URL(fileURLWithPath: NSTemporaryDirectory())
                 .appendingPathComponent("\(UUID().uuidString)")
                 .appendingPathExtension(pathExtension)
+            #if os(macOS)
+            var data: Data?
+            if let cgImage = cgImage(forProposedRect: nil, context: nil, hints: nil) {
+                let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
+                data = bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])!
+            }
+            #else
             let data = jpegData(compressionQuality: 0.8)
+            #endif
             try data?.write(to: url, options: .atomic)
             return .init(contentsOf: url)
         } catch {
