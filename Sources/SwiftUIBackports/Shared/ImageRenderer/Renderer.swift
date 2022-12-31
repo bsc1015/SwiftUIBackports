@@ -4,7 +4,11 @@ public final class ImageRenderer<Content>: ObservableObject where Content: View 
     public var content: Content
     public var label: String?
     public var proposedSize: ProposedViewSize = .unspecified
+    #if os(macOS)
+    public var scale: CGFloat = NSScreen.main?.backingScaleFactor ?? 1
+    #else
     public var scale: CGFloat = UIScreen.main.scale
+    #endif
     public var isOpaque: Bool = false
     public var colorMode: ColorRenderingMode = .nonLinear
     
@@ -22,7 +26,7 @@ public final class ImageRenderer<Content>: ObservableObject where Content: View 
 public extension ImageRenderer {
     var cgImage: CGImage? {
         #if os(macOS)
-        nsImage?.cgImage
+        nsImage?.cgImage(forProposedRect: nil, context: nil, hints: nil)
         #else
         uiImage?.cgImage
         #endif
